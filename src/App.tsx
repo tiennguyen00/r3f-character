@@ -1,9 +1,16 @@
+"use client";
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
+import UI from "./components/UI";
+
+const Experience = () => {
+  return <></>;
+};
 
 function App() {
   return (
     <>
+      <UI />
       <Canvas
         camera={{
           position: [3, 3, 3],
@@ -11,7 +18,7 @@ function App() {
       >
         <color attach="background" args={["#333"]} />
         <OrbitControls />
-        <mesh></mesh>
+        <Experience />
       </Canvas>
     </>
   );
