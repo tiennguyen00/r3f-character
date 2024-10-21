@@ -36,12 +36,12 @@ const AssetsBox = () => {
         ))}
       </div>
       <div className="flex flex-wrap gap-2">
-        {assets.map((asset: string, index: number) => (
+        {assets.map((asset: any, index: number) => (
           <button
             key={index}
             className={`w-20 h-20 rounded-md overflow-hidden bg-gray-200 pointer-events-auto hover:opacity-100 transition-all border-2 duration-500`}
           >
-            <img src={asset} />
+            <img src={asset.thumbnail} />
           </button>
         ))}
       </div>

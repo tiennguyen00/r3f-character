@@ -2,9 +2,14 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import UI from "./components/UI";
+import { Armature } from "./components/Armature";
 
 const Experience = () => {
-  return <></>;
+  return (
+    <>
+      <Armature />
+    </>
+  );
 };
 
 function App() {
