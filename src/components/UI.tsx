@@ -9,6 +9,7 @@ const AssetsBox = () => {
     assets,
     setCurrentCategory,
     currentCategory,
+    setCustomization,
   } = useCategories();
 
   useEffect(() => {
@@ -18,6 +19,7 @@ const AssetsBox = () => {
   useEffect(() => {
     if (currentCategory) fetchAssets(currentCategory);
   }, [currentCategory]);
+
   return (
     <div className="flex flex-col gap-6 p-6 bg-white rounded-2xl drop-shadow-md">
       <div className="flex items-center gap-6 pointer-events-auto">
@@ -40,6 +42,13 @@ const AssetsBox = () => {
           <button
             key={index}
             className={`w-20 h-20 rounded-md overflow-hidden bg-gray-200 pointer-events-auto hover:opacity-100 transition-all border-2 duration-500`}
+            onClick={() => {
+              if (currentCategory)
+                setCustomization({
+                  name: currentCategory,
+                  model: asset.model,
+                });
+            }}
           >
             <img src={asset.thumbnail} />
           </button>

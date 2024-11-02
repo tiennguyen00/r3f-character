@@ -2,12 +2,12 @@
 import { Canvas } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import UI from "./components/UI";
-import { Armature } from "./components/Armature";
+import { Avatar } from "./components/Avatar";
 
 const Experience = () => {
   return (
     <>
-      <Armature />
+      <Avatar />
     </>
   );
 };

@@ -17,12 +17,30 @@ interface CategoriesProps {
   fetchCategories: () => void;
   setCurrentCategory: (v: string) => void;
   fetchAssets: (v: string) => void;
+  customization: { name: string; model: string }[];
+  setCustomization: (v: { name: string; model: string }) => void;
 }
 
 export const useCategories = create<CategoriesProps>((set) => ({
   categories: [],
   currentCategory: null,
   assets: [],
+  customization: [],
+  setCustomization: (v) => {
+    set((state) => {
+      const index = state.customization.findIndex((i) => i.name === v.name);
+      if (index !== -1) {
+        const innerCustomization = [...state.customization];
+        innerCustomization[index] = v;
+        return {
+          customization: innerCustomization,
+        };
+      } else
+        return {
+          customization: [...state.customization, v],
+        };
+    });
+  },
   fetchCategories: () => {
     const categoriesRef = ref(database, "CustomizationGroup");
 
@@ -42,11 +60,9 @@ export const useCategories = create<CategoriesProps>((set) => ({
   },
   fetchAssets: async (v: string) => {
     const assetsRef = await get(ref(database, "CustomizationAssets"));
-    const value = Object.values(assetsRef.val()).filter(
-      (i: any) => i.type === v.toLocaleLowerCase()
-    );
-
-    console.log("assetsRef: ", value);
+    const value = Object.values(assetsRef.val()).filter((i: any) => {
+      return i.type === v.toLocaleLowerCase();
+    });
 
     try {
       const assetsResult: Record<string, string>[] = [];
@@ -64,10 +80,9 @@ export const useCategories = create<CategoriesProps>((set) => ({
           );
 
           try {
-            console.log(thumbnail);
-
-            // const urlModel = await getDownloadURL(pathReference);
-            const urlModel = "";
+            const urlModel = await getDownloadURL(pathReference);
+            // console.log(urlModel);
+            // const urlModel = "";
 
             const thumbnailUrl = v.thumbnail
               ? await getDownloadURL(thumbnail)
@@ -83,7 +98,6 @@ export const useCategories = create<CategoriesProps>((set) => ({
       );
 
       // This line will run only after all URLs are fetched
-      console.log("assetsResult: ", assetsResult);
       set({ assets: assetsResult });
     } catch (error) {
       console.error("Error listing files: ", error);
