@@ -1,6 +1,11 @@
 import { create } from "zustand";
 import { firebaseConfigApp } from "./firebaseconfig";
-import { get, getDatabase, onValue, ref } from "firebase/database";
+import {
+  get as getFirebase,
+  getDatabase,
+  onValue,
+  ref,
+} from "firebase/database";
 import {
   getStorage,
   getDownloadURL,
@@ -21,7 +26,7 @@ interface CategoriesProps {
   setCustomization: (v: { name: string; model: string }) => void;
 }
 
-export const useCategories = create<CategoriesProps>((set) => ({
+export const useCategories = create<CategoriesProps>((set, get) => ({
   categories: [],
   currentCategory: null,
   assets: [],
@@ -50,8 +55,24 @@ export const useCategories = create<CategoriesProps>((set) => ({
         const dataItem = snapshot.val();
         set({
           categories: dataItem,
-          currentCategory: dataItem[0],
         });
+
+        // Set the default assets for character.
+        Promise.all(
+          dataItem.map(async (v: any) => {
+            const pathReference = refStorage(
+              storage,
+              `gs://r3f-character.appspot.com/${v + ".001.glb"}`
+            );
+            console.log(pathReference);
+
+            const urlModel = await getDownloadURL(pathReference);
+            get().setCustomization({
+              name: v,
+              model: urlModel,
+            });
+          })
+        );
       },
       (err) => {
         console.log("Error in fetching data: ", err);
@@ -59,7 +80,7 @@ export const useCategories = create<CategoriesProps>((set) => ({
     );
   },
   fetchAssets: async (v: string) => {
-    const assetsRef = await get(ref(database, "CustomizationAssets"));
+    const assetsRef = await getFirebase(ref(database, "CustomizationAssets"));
     const value = Object.values(assetsRef.val()).filter((i: any) => {
       return i.type === v.toLocaleLowerCase();
     });
@@ -97,7 +118,6 @@ export const useCategories = create<CategoriesProps>((set) => ({
         })
       );
 
-      // This line will run only after all URLs are fetched
       set({ assets: assetsResult });
     } catch (error) {
       console.error("Error listing files: ", error);
