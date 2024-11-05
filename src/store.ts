@@ -24,6 +24,8 @@ interface CategoriesProps {
   fetchAssets: (v: string) => void;
   customization: { name: string; model: string }[];
   setCustomization: (v: { name: string; model: string }) => void;
+  download: () => void;
+  setDownload: (v: () => void) => void;
 }
 
 export const useCategories = create<CategoriesProps>((set, get) => ({
@@ -64,7 +66,6 @@ export const useCategories = create<CategoriesProps>((set, get) => ({
               storage,
               `gs://r3f-character.appspot.com/${v + ".001.glb"}`
             );
-            console.log(pathReference);
 
             const urlModel = await getDownloadURL(pathReference);
             get().setCustomization({
@@ -124,4 +125,11 @@ export const useCategories = create<CategoriesProps>((set, get) => ({
     }
   },
   setCurrentCategory: (category: string) => set({ currentCategory: category }),
+  download: () => {
+    return;
+  },
+  setDownload: (v) =>
+    set({
+      download: v,
+    }),
 }));
