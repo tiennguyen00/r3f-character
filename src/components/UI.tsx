@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useCategories } from "../store";
+import { mappingColorGroupToPalettes, useCategories } from "../store";
 
 const AssetsBox = () => {
   const {
@@ -10,6 +10,8 @@ const AssetsBox = () => {
     setCurrentCategory,
     currentCategory,
     setCustomization,
+    palettes: { mappingtoGroup, data },
+    customization,
   } = useCategories();
 
   useEffect(() => {
@@ -37,6 +39,19 @@ const AssetsBox = () => {
           </button>
         ))}
       </div>
+      <div className="flex space-x-1">
+        {customization
+          .find((c) => c.name === currentCategory)
+          ?.color?.map((c) => (
+            <div
+              key={c}
+              className="w-4 h-4 cursor-pointer"
+              style={{
+                background: c,
+              }}
+            />
+          ))}
+      </div>
       <div className="flex flex-wrap gap-2">
         {assets.map((asset: any, index: number) => (
           <button
@@ -47,6 +62,11 @@ const AssetsBox = () => {
                 setCustomization({
                   name: currentCategory,
                   model: asset.model,
+                  color: mappingColorGroupToPalettes(
+                    currentCategory,
+                    mappingtoGroup,
+                    data
+                  ),
                 });
             }}
           >

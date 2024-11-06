@@ -17,22 +17,42 @@ export const storage = getStorage(firebaseConfigApp);
 
 interface CategoriesProps {
   categories: string[];
+  palettes: {
+    mappingtoGroup: {};
+    data: {};
+  };
   currentCategory: string | null;
   assets: Record<string, string>[];
   fetchCategories: () => void;
   setCurrentCategory: (v: string) => void;
   fetchAssets: (v: string) => void;
-  customization: { name: string; model: string }[];
-  setCustomization: (v: { name: string; model: string }) => void;
-  download: () => void;
-  setDownload: (v: () => void) => void;
+  customization: { name: string; model: string; color: string[] }[];
+  setCustomization: (v: {
+    name: string;
+    model: string;
+    color: string[];
+  }) => void;
 }
 
-export const useCategories = create<CategoriesProps>((set, get) => ({
+export const mappingColorGroupToPalettes = (
+  groupName: string,
+  mappingtoGroup: Record<string, string>,
+  data: Record<string, string>
+): string[] => {
+  return mappingtoGroup[groupName]
+    ? Object.values(data[mappingtoGroup[groupName]])
+    : [];
+};
+
+export const useCategories = create<CategoriesProps>((set) => ({
   categories: [],
   currentCategory: null,
   assets: [],
   customization: [],
+  palettes: {
+    mappingtoGroup: {},
+    data: {},
+  },
   setCustomization: (v) => {
     set((state) => {
       const index = state.customization.findIndex((i) => i.name === v.name);
@@ -48,8 +68,21 @@ export const useCategories = create<CategoriesProps>((set, get) => ({
         };
     });
   },
-  fetchCategories: () => {
+  fetchCategories: async () => {
     const categoriesRef = ref(database, "CustomizationGroup");
+    const palettesRef = await getFirebase(
+      ref(database, "CustomizationPalettes")
+    );
+    const joinCategoriesAndPalettes = await getFirebase(
+      ref(database, "JoinGroupAndPalettes")
+    );
+
+    set({
+      palettes: {
+        mappingtoGroup: joinCategoriesAndPalettes.val(),
+        data: palettesRef.val(),
+      },
+    });
 
     onValue(
       categoriesRef,
@@ -60,20 +93,35 @@ export const useCategories = create<CategoriesProps>((set, get) => ({
         });
 
         // Set the default assets for character.
+        const result = [] as any;
         Promise.all(
           dataItem.map(async (v: any) => {
-            const pathReference = refStorage(
-              storage,
-              `gs://r3f-character.appspot.com/${v + ".001.glb"}`
-            );
+            try {
+              const pathReference = refStorage(
+                storage,
+                `gs://r3f-character.appspot.com/${v + ".001.glb"}`
+              );
 
-            const urlModel = await getDownloadURL(pathReference);
-            get().setCustomization({
-              name: v,
-              model: urlModel,
-            });
+              const urlModel = await getDownloadURL(pathReference);
+
+              result.push({
+                name: v,
+                model: urlModel,
+                color: mappingColorGroupToPalettes(
+                  v,
+                  joinCategoriesAndPalettes.val(),
+                  palettesRef.val()
+                ),
+              });
+            } catch (err) {
+              console.error("Error while fetching assets: ", err);
+            }
           })
-        );
+        ).then(() => {
+          set({
+            customization: result,
+          });
+        });
       },
       (err) => {
         console.log("Error in fetching data: ", err);
@@ -125,11 +173,4 @@ export const useCategories = create<CategoriesProps>((set, get) => ({
     }
   },
   setCurrentCategory: (category: string) => set({ currentCategory: category }),
-  download: () => {
-    return;
-  },
-  setDownload: (v) =>
-    set({
-      download: v,
-    }),
 }));
