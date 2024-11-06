@@ -29,7 +29,7 @@ function App() {
       <UI />
       <Canvas
         camera={{
-          position: [-1, 1, 5],
+          position: [-1, 5, 5],
           fov: 45,
         }}
         shadows

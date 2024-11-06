@@ -26,11 +26,17 @@ interface CategoriesProps {
   fetchCategories: () => void;
   setCurrentCategory: (v: string) => void;
   fetchAssets: (v: string) => void;
-  customization: { name: string; model: string; color: string[] }[];
+  customization: {
+    name: string;
+    model?: string;
+    color?: string[];
+    selectedColor?: string;
+  }[];
   setCustomization: (v: {
     name: string;
-    model: string;
-    color: string[];
+    model?: string;
+    color?: string[];
+    selectedColor?: string;
   }) => void;
 }
 
@@ -58,7 +64,7 @@ export const useCategories = create<CategoriesProps>((set) => ({
       const index = state.customization.findIndex((i) => i.name === v.name);
       if (index !== -1) {
         const innerCustomization = [...state.customization];
-        innerCustomization[index] = v;
+        innerCustomization[index] = { ...innerCustomization[index], ...v };
         return {
           customization: innerCustomization,
         };
@@ -103,15 +109,17 @@ export const useCategories = create<CategoriesProps>((set) => ({
               );
 
               const urlModel = await getDownloadURL(pathReference);
+              const colors = mappingColorGroupToPalettes(
+                v,
+                joinCategoriesAndPalettes.val(),
+                palettesRef.val()
+              );
 
               result.push({
                 name: v,
                 model: urlModel,
-                color: mappingColorGroupToPalettes(
-                  v,
-                  joinCategoriesAndPalettes.val(),
-                  palettesRef.val()
-                ),
+                color: colors,
+                selectedColor: colors[0],
               });
             } catch (err) {
               console.error("Error while fetching assets: ", err);
