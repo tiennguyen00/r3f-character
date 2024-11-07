@@ -11,6 +11,7 @@ import {
   getDownloadURL,
   ref as refStorage,
 } from "firebase/storage";
+import { randInt } from "three/src/math/MathUtils.js";
 
 export const database = getDatabase(firebaseConfigApp);
 export const storage = getStorage(firebaseConfigApp);
@@ -38,6 +39,7 @@ interface CategoriesProps {
     color?: string[];
     selectedColor?: string;
   }) => void;
+  randomize: () => void;
 }
 
 export const mappingColorGroupToPalettes = (
@@ -50,7 +52,7 @@ export const mappingColorGroupToPalettes = (
     : [];
 };
 
-export const useCategories = create<CategoriesProps>((set) => ({
+export const useCategories = create<CategoriesProps>((set, get) => ({
   categories: [],
   currentCategory: null,
   assets: [],
@@ -181,4 +183,30 @@ export const useCategories = create<CategoriesProps>((set) => ({
     }
   },
   setCurrentCategory: (category: string) => set({ currentCategory: category }),
+  randomize: async () => {
+    const assetsRef = await getFirebase(ref(database, "CustomizationAssets"));
+
+    get().categories.forEach(async (c) => {
+      const arrayAsset = Object.values(assetsRef.val()).filter((i: any) => {
+        return i.type === c.toLocaleLowerCase();
+      });
+
+      const randomItem = arrayAsset[randInt(0, arrayAsset.length - 1)];
+
+      const pathReference = refStorage(
+        storage,
+        `gs://r3f-character.appspot.com/${randomItem?.url}`
+      );
+      try {
+        const urlModel = await getDownloadURL(pathReference);
+
+        get().setCustomization({
+          name: c,
+          model: urlModel,
+        });
+      } catch (err) {
+        console.error(err);
+      }
+    });
+  },
 }));

@@ -1,49 +1,54 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useGLTF } from "@react-three/drei";
-import { useEffect, useMemo } from "react";
-import { Skeleton } from "three";
+import { useEffect, useState } from "react";
+import * as THREE from "three";
 import { useCategories } from "../store";
 
 interface AssetProps {
   url: string;
-  skeleton?: Skeleton;
+  skeleton?: THREE.Skeleton;
 }
 
 const Asset = ({ url, skeleton }: AssetProps) => {
   const { scene } = useGLTF(url);
   const { customization, currentCategory } = useCategories();
+  const [attachedItems, setAttachedItems] = useState([]);
 
   useEffect(() => {
     if (currentCategory) {
       const assetColor = customization.find(
         (c) => c.name === currentCategory
       )?.selectedColor;
+      const itesm = [];
 
       scene.traverse((child: any) => {
         if (child.isMesh) {
           if (
-            child.material?.name.includes("Color_") &&
             child?.name.toLowerCase().includes(currentCategory.toLowerCase())
-          )
-            child.material.color.set(assetColor);
+          ) {
+            if (child.material?.name.includes("Color_"))
+              child.material.color.set(assetColor);
+            // only update the skin material whiile the current category is "head"
+            if (
+              child.material?.name.includes("Skin_") &&
+              child.name.toLowerCase().includes("head")
+            ) {
+              child.material = new THREE.MeshStandardMaterial({
+                color: assetColor,
+                roughness: 1,
+                name: "Skin_",
+              });
+            }
+          }
+          itesm.push({
+            geometry: child.geometry,
+            material: child.material,
+          });
         }
       });
+      setAttachedItems(itesm);
     }
   }, [currentCategory, customization, scene]);
-
-  const attachedItems = useMemo(() => {
-    const items: any[] = [];
-    scene.traverse((child: any) => {
-      if (child.isMesh) {
-        items.push({
-          geometry: child.geometry,
-          material: child.material,
-        });
-      }
-    });
-
-    return items;
-  }, [scene]);
 
   return attachedItems.map((item) => (
     <skinnedMesh

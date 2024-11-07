@@ -106,13 +106,28 @@ const DownloadButton = () => {
   );
 };
 
+const RandomizeButton = () => {
+  const randomize = useCategories((s) => s.randomize);
+  return (
+    <button
+      onClick={randomize}
+      className="px-4 py-3 font-medium text-white transition-colors duration-300 bg-indigo-500 rounded-lg pointer-events-auto hover:bg-indigo-600"
+    >
+      Random
+    </button>
+  );
+};
+
 const UI = () => {
   return (
     <main className="fixed inset-0 z-10 p-10 ">
       <div className="flex flex-col justify-between w-full h-full max-w-screen-xl mx-auto">
         <div className="flex items-center justify-between pointer-events-none select-none">
           <h1 className="font-bold text-white uppercase">Hello world</h1>
-          <DownloadButton />
+          <div className="flex space-x-1">
+            <DownloadButton />
+            <RandomizeButton />
+          </div>
         </div>
         <div className="flex flex-col gap-6">
           <AssetsBox />
