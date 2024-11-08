@@ -42,6 +42,8 @@ interface CategoriesProps {
   randomize: () => void;
 }
 
+export const skinAsset = ["top", "nose", "head", "bottom"];
+
 export const mappingColorGroupToPalettes = (
   groupName: string,
   mappingtoGroup: Record<string, string>,
@@ -184,29 +186,25 @@ export const useCategories = create<CategoriesProps>((set, get) => ({
   },
   setCurrentCategory: (category: string) => set({ currentCategory: category }),
   randomize: async () => {
-    const assetsRef = await getFirebase(ref(database, "CustomizationAssets"));
-
-    get().categories.forEach(async (c) => {
-      const arrayAsset = Object.values(assetsRef.val()).filter((i: any) => {
-        return i.type === c.toLocaleLowerCase();
-      });
-
-      const randomItem = arrayAsset[randInt(0, arrayAsset.length - 1)];
-
-      const pathReference = refStorage(
-        storage,
-        `gs://r3f-character.appspot.com/${randomItem?.url}`
-      );
-      try {
-        const urlModel = await getDownloadURL(pathReference);
-
-        get().setCustomization({
-          name: c,
-          model: urlModel,
-        });
-      } catch (err) {
-        console.error(err);
-      }
-    });
+    // const assetsRef = await getFirebase(ref(database, "CustomizationAssets"));
+    // get().categories.forEach(async (c) => {
+    //   const arrayAsset = Object.values(assetsRef.val()).filter((i: any) => {
+    //     return i.type === c.toLocaleLowerCase();
+    //   });
+    //   const randomItem = arrayAsset[randInt(0, arrayAsset.length - 1)];
+    //   const pathReference = refStorage(
+    //     storage,
+    //     `gs://r3f-character.appspot.com/${randomItem?.url}`
+    //   );
+    //   try {
+    //     const urlModel = await getDownloadURL(pathReference);
+    //     get().setCustomization({
+    //       name: c,
+    //       model: urlModel,
+    //     });
+    //   } catch (err) {
+    //     console.error(err);
+    //   }
+    // });
   },
 }));

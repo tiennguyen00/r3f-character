@@ -15,7 +15,7 @@ const Experience = () => {
       <Backdrop scale={[50, 10, 5]} floor={1.5} receiveShadow position-z={-4}>
         <meshStandardMaterial color="#555" />
       </Backdrop>
-      <group position-y={0}>
+      <group>
         <Avatar />
       </group>
       <SoftShadows size={52} samples={16} />

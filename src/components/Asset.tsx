@@ -2,7 +2,7 @@
 import { useGLTF } from "@react-three/drei";
 import { useEffect, useState } from "react";
 import * as THREE from "three";
-import { useCategories } from "../store";
+import { skinAsset, useCategories } from "../store";
 
 interface AssetProps {
   url: string;
@@ -23,23 +23,51 @@ const Asset = ({ url, skeleton }: AssetProps) => {
 
       scene.traverse((child: any) => {
         if (child.isMesh) {
+          const childName = child?.name.toLowerCase();
+          const catergoryName = currentCategory.toLocaleLowerCase();
+
           if (
-            child?.name.toLowerCase().includes(currentCategory.toLowerCase())
+            catergoryName.includes("head") ||
+            catergoryName.includes("nose")
           ) {
-            if (child.material?.name.includes("Color_"))
-              child.material.color.set(assetColor);
-            // only update the skin material whiile the current category is "head"
             if (
-              child.material?.name.includes("Skin_") &&
-              child.name.toLowerCase().includes("head")
+              childName.includes("top") ||
+              childName.includes("bottom") ||
+              childName.includes("head") ||
+              childName.includes("nose")
             ) {
-              child.material = new THREE.MeshStandardMaterial({
-                color: assetColor,
-                roughness: 1,
-                name: "Skin_",
-              });
+              if (child.material?.name.includes("Skin_")) {
+                child.material = new THREE.MeshStandardMaterial({
+                  color: assetColor,
+                  roughness: 1,
+                  name: "Skin_",
+                });
+              }
+            }
+          } else if (
+            childName.includes("top") ||
+            childName.includes("bottom")
+          ) {
+            if (
+              childName.includes(catergoryName) &&
+              child.material?.name.includes("Color_")
+            ) {
+              child.material.color.set(assetColor);
+            }
+          } else {
+            if (childName.includes(catergoryName)) {
+              if (child.material?.name.includes("Color_"))
+                child.material.color.set(assetColor);
+              if (child.material?.name.includes("Skin_")) {
+                child.material = new THREE.MeshStandardMaterial({
+                  color: assetColor,
+                  roughness: 1,
+                  name: "Skin_",
+                });
+              }
             }
           }
+
           itesm.push({
             geometry: child.geometry,
             material: child.material,
